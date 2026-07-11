@@ -285,7 +285,7 @@ pub fn init(allocator: std.mem.Allocator) Self {
 
     if (parsed.value.object.get("KeyMap")) |key_map| self.key_map = KeyMap.parse(key_map, arena_allocator);
     if (parsed.value.object.get("FileMonitor")) |file_monitor| self.file_monitor = FileMonitor.parse(file_monitor, arena_allocator);
-    if (parsed.value.object.get("SocketServerServer")) |socket_server| self.socket_server = SocketServer.parse(socket_server, arena_allocator);
+    if (parsed.value.object.get("SocketServer")) |socket_server| self.socket_server = SocketServer.parse(socket_server, arena_allocator);
     if (parsed.value.object.get("General")) |general| self.general = General.parse(general, arena_allocator);
     if (parsed.value.object.get("StatusBar")) |status_bar| self.status_bar = StatusBar.parse(status_bar, arena_allocator);
     if (parsed.value.object.get("Cache")) |cache| self.cache = Cache.parse(cache, arena_allocator);
