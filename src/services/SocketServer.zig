@@ -57,7 +57,7 @@ pub fn listen(
     }
 }
 
-/// Following is for polling at 200ms
+// Following is for polling at 200ms
 
 // pub fn init(allocator: std.mem.Allocator, config: *Config) !Self {
 //     const runtime_dir = std.process.getEnvVarOwned(allocator, "XDG_RUNTIME_DIR") catch
