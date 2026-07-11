@@ -78,16 +78,16 @@ pub const FileMonitor = struct {
     }
 };
 
-pub const Socket = struct {
+pub const SocketServer = struct {
     enabled: bool = false,
 
-    pub fn parse(val: std.json.Value, allocator: std.mem.Allocator) Socket {
-        var socket = Socket{};
-        if (val != .object) return socket;
+    pub fn parse(val: std.json.Value, allocator: std.mem.Allocator) SocketServer {
+        var socket_server = SocketServer{};
+        if (val != .object) return socket_server;
 
-        socket.enabled = parseType(bool, val.object, "enabled", allocator, socket.enabled);
+        socket_server.enabled = parseType(bool, val.object, "enabled", allocator, socket_server.enabled);
 
-        return socket;
+        return socket_server;
     }
 };
 
@@ -240,7 +240,7 @@ arena: std.heap.ArenaAllocator,
 
 key_map: KeyMap = .{},
 file_monitor: FileMonitor = .{},
-socket: Socket = .{},
+socket_server: SocketServer = .{},
 general: General = .{},
 status_bar: StatusBar = .{},
 cache: Cache = .{},
@@ -285,7 +285,7 @@ pub fn init(allocator: std.mem.Allocator) Self {
 
     if (parsed.value.object.get("KeyMap")) |key_map| self.key_map = KeyMap.parse(key_map, arena_allocator);
     if (parsed.value.object.get("FileMonitor")) |file_monitor| self.file_monitor = FileMonitor.parse(file_monitor, arena_allocator);
-    if (parsed.value.object.get("Socket")) |socket| self.socket = Socket.parse(socket, arena_allocator);
+    if (parsed.value.object.get("SocketServerServer")) |socket_server| self.socket_server = SocketServer.parse(socket_server, arena_allocator);
     if (parsed.value.object.get("General")) |general| self.general = General.parse(general, arena_allocator);
     if (parsed.value.object.get("StatusBar")) |status_bar| self.status_bar = StatusBar.parse(status_bar, arena_allocator);
     if (parsed.value.object.get("Cache")) |cache| self.cache = Cache.parse(cache, arena_allocator);

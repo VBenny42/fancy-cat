@@ -72,7 +72,7 @@ pub const Context = struct {
             if (watcher) |*w| try w.addFile(path);
         }
         var socket_server: ?SocketServer = null;
-        if (config.socket.enabled) {
+        if (config.socket_server.enabled) {
             socket_server = SocketServer.init(allocator, config) catch null;
         }
 
@@ -191,7 +191,7 @@ pub const Context = struct {
                 }
             }
         }
-        if (self.config.socket.enabled) {
+        if (self.config.socket_server.enabled) {
             if (self.socket_server) |*s| {
                 self.socket_thread = try std.Thread.spawn(.{}, socketWorker, .{ s, &loop });
             }
