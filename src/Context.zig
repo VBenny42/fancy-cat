@@ -8,6 +8,7 @@ const DocumentHandler = @import("handlers/DocumentHandler.zig");
 const Cache = @import("./Cache.zig");
 const ReloadIndicatorTimer = @import("services/ReloadIndicatorTimer.zig");
 const History = @import("services/History.zig");
+const SocketServer = @import("services/SocketServer.zig");
 
 pub const panic = vaxis.panic_handler;
 
@@ -37,6 +38,8 @@ pub const Context = struct {
     current_page: ?vaxis.Image,
     watcher: ?fzwatch.Watcher,
     watcher_thread: ?std.Thread,
+    socket_server: ?SocketServer,
+    socket_thread: ?std.Thread,
     config: *Config,
     current_mode: Mode,
     history: History,
@@ -68,6 +71,10 @@ pub const Context = struct {
             watcher = try fzwatch.Watcher.init(allocator);
             if (watcher) |*w| try w.addFile(path);
         }
+        var socket_server: ?SocketServer = null;
+        if (config.socket.enabled) {
+            socket_server = SocketServer.init(allocator, config) catch null;
+        }
 
         const vx = try vaxis.init(allocator, .{});
         const buf = try allocator.alloc(u8, 4096);
@@ -87,6 +94,8 @@ pub const Context = struct {
             .watcher = watcher,
             .mouse = null,
             .watcher_thread = null,
+            .socket_server = socket_server,
+            .socket_thread = null,
             .config = config,
             .current_mode = undefined,
             .history = history,
@@ -109,6 +118,10 @@ pub const Context = struct {
             w.stop();
             if (self.watcher_thread) |thread| thread.join();
             w.deinit();
+        }
+        if (self.socket_server) |*s| {
+            s.deinit();
+            if (self.socket_thread) |t| t.join();
         }
 
         if (self.page_info_text.len > 0) self.allocator.free(self.page_info_text);
@@ -136,6 +149,15 @@ pub const Context = struct {
 
     fn watcherWorker(self: *Self, watcher: *fzwatch.Watcher) !void {
         try watcher.start(.{ .latency = self.config.file_monitor.latency });
+    }
+
+    fn socketWorker(server: *SocketServer, loop: *vaxis.Loop(Event)) !void {
+        try server.listen(loop, socketCallback);
+    }
+
+    fn socketCallback(context: ?*anyopaque) void {
+        const loop = @as(*vaxis.Loop(Event), @ptrCast(@alignCast(context.?)));
+        loop.postEvent(Event.file_changed);
     }
 
     pub fn run(self: *Self) !void {
@@ -167,6 +189,11 @@ pub const Context = struct {
                         }
                     }
                 }
+            }
+        }
+        if (self.config.socket.enabled) {
+            if (self.socket_server) |*s| {
+                self.socket_thread = try std.Thread.spawn(.{}, socketWorker, .{ s, &loop });
             }
         }
 
