@@ -33,9 +33,13 @@ pub fn init(allocator: std.mem.Allocator, config: *Config) !Self {
 
 pub fn deinit(self: *Self) void {
     self.should_stop.store(true, .seq_cst);
-    if (self.server) |*s| s.deinit();
+    if (self.server) |*s| {
+        s.deinit();
+        self.server = null;
+    }
     std.fs.deleteFileAbsolute(self.path) catch {};
     self.allocator.free(self.path);
+    self.path = &.{};
 }
 
 pub fn listen(
