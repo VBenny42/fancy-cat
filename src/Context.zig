@@ -326,9 +326,10 @@ pub const Context = struct {
             var y_pix = winsize.rows * pix_per_row;
             if (self.config.status_bar.enabled) {
                 y_pix -|= 2 * pix_per_row;
-            } else {
-                y_pix -|= 1 * pix_per_row;
-            }
+            } 
+            // else {
+            //     y_pix -|= 1 * pix_per_row;
+            // }
 
             self.current_page = try self.getPage(
                 self.document_handler.getCurrentPageNumber(),
